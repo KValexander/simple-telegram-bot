@@ -1,7 +1,7 @@
 # Api
 api = {
 	"api": "https://api.telegram.org/bot",
-	"token": "5192104143:AAEFIYiHa9cjIAN4pU9zSePdk34qKYp6lF0",
+	"token": "",
 }
 api["url"] = api["api"] + api["token"]
 
