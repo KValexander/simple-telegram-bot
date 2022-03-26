@@ -4,6 +4,16 @@ import requests
 # Files
 from config import *
 
+# TG api commands
+tg_commands = {
+	"getUpdates": "/getUpdates?",
+	"sendMessage": "/sendMessage?",
+	"sendPhoto": "/sendPhoto?",
+	"sendMediaGroup": "/sendMediaGroup?",
+	"getFile": "/getFile?",
+	"getChat": "/getChat?",
+}
+
 # Get updates
 def getUpdates(offset=""):
 	get = api["url"] + tg_commands["getUpdates"] + offset
@@ -33,3 +43,10 @@ def getFile(file_id):
 	message = f"file_id={file_id}"
 	get = api["url"] + tg_commands["getFile"] + message
 	return requests.get(get)
+
+# Get chat
+def getChat(chat):
+	message = f"chat_id={chat}"
+	get = api["url"] + tg_commands["getFile"] + message
+	return requests.get(get)
+	

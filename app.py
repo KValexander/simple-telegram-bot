@@ -1,4 +1,5 @@
 # Libraries
+import json
 import threading
 
 # Files
@@ -15,7 +16,7 @@ class App:
 		self.update_id = 0
 		self.update_limit = 30
 
-		self.current_command = ""
+		self.current_command = None
 
 		self.storage = Storage()
 
@@ -46,6 +47,7 @@ class App:
 			# Command processing
 			if self.current_command:
 				self.commandProcessing(data)
+				self.current_command = None
 
 			# Return message text
 			if "text" in upd_obj["message"]:
@@ -67,7 +69,42 @@ class App:
 
 	# Command initialization
 	def commandInit(self, command):
+		print(command)
 
 		# /start
+		# Start app
 		if command == "start":
 			sendMessage(self.chat_id, "Добро пожаловать. Выберите интересующее вас действие, введя в поле ввода \"/\"")
+
+		# /upload
+		# Image upload
+		elif command == "upload":
+			self.current_command = command
+			sendMessage(self.chat_id, "Вставьте изображение (не более 10 за раз для корректного добавления)")
+
+		# /view
+		# Image view
+		elif command == "view":
+			if not self.outPhotos(self.storage.getPhotos(self.chat_id), self.chat_id):
+				sendMessage(self.chat_id, "Добавленные изображения отсутствуют")
+		
+		# /add_chat
+		# Add chat to post
+		elif command == "add_chat":
+			pass
+
+	# Add photo
+	def addPhoto(self, file_id):
+		pass
+
+	# Out photos
+	def outPhotos(self, array, chat_id):
+		count = len(array)
+		
+		if not count: return False
+
+		for photos in array:
+			sendMediaGroup(chat_id, json.dumps(photos))
+
+		if chat_id == self.chat_id:
+			sendMessage(chat_id, f"Всего изображений: {count}")
