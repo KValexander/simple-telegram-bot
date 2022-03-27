@@ -24,29 +24,28 @@ def getUpdates(offset=""):
 def sendMessage(chat_id, text):
 	message = f"chat_id={chat_id}&text={text}";
 	get = api["url"] + tg_commands["sendMessage"] + message
-	return requests.get(get)
+	return requests.get(get).json()
 
 # Send photo
 def sendPhoto(chat_id, file_id):
 	message = f"chat_id={chat_id}&photo={file_id}"
 	get = api["url"] + tg_commands["sendPhoto"] + message
-	return requests.get(get)
+	return requests.get(get).json()
 
 # Send media group
 def sendMediaGroup(chat_id, media):
 	message = f"chat_id={chat_id}&media={media}"
 	get = api["url"] + tg_commands["sendMediaGroup"] + message
-	return requests.get(get)
+	return requests.get(get).json()
 
 # Get file
 def getFile(file_id):
 	message = f"file_id={file_id}"
 	get = api["url"] + tg_commands["getFile"] + message
-	return requests.get(get)
+	return requests.get(get).json()
 
 # Get chat
 def getChat(chat):
 	message = f"chat_id={chat}"
-	get = api["url"] + tg_commands["getFile"] + message
-	return requests.get(get)
-	
+	get = api["url"] + tg_commands["getChat"] + message
+	return requests.get(get).json()

@@ -8,8 +8,8 @@ import threading
 api = {
     "url": "",
     "api":  "https://api.telegram.org/bot",
-    "token": "",
-    "publication_chat_id": 0,
+    "token": "5192104143:AAEWVTkhk1cnZWBUP013Qn7sSa5OExb6H1o",
+    "publication_chat_id": -1001739776156,
     "user_id": 0,
     "chat_id": 0,
     "update_id": 0,
@@ -59,7 +59,7 @@ def getCommand():
     if update_obj["update_id"] != api["update_id"]:
 
         # Command processing
-        if api["current_command"]:
+        if api["current_command"] and api["chat_id"] == update_obj[":
             commandProcessing(update_obj, response)
 
         # Command return

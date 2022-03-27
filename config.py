@@ -8,6 +8,16 @@ api["url"] = api["api"] + api["token"]
 # Commands
 commands = {
 	"/start": "start",
-	"/upload": "upload",
-	"/view": "view",
+	# Chats
+	"/upload_chat": "upload_chat",
+	"/view_chats": "view_chats",
+	"/clear_chats": "clear_chats",
+	# Messages
+	"/upload_message": "upload_message",
+	"/view_messages": "view_messages",
+	"/clear_messages": "clear_messages",
+	# Photos
+	"/upload_photos": "upload_photos",
+	"/view_photos": "view_photos",
+	"/clear_photos": "clear_photos",
 }
