@@ -7,6 +7,7 @@ from methods import *
 
 # Classes
 from storage import Storage
+from commands import Commands
 
 # Class App
 class App:
@@ -19,6 +20,7 @@ class App:
 		self.commands = []
 
 		self.storage = Storage()
+		self.cmd = Commands(self)
 
 	# Get response
 	def getResponse(self, filtration=False):
@@ -60,66 +62,9 @@ class App:
 		command = [x for x in self.commands if x["chat_id"] == self.chat_id]
 		if not len(command): return
 
+		# Processing distribution
 		command = self.deleteCommand(self.chat_id)["command"]
-		update_dict = response[-1]
-
-		# Upload chat
-		if command == "upload_chat":
-
-			# Upload chat
-			if "text" in update_dict["message"]:
-				chat = getChat(update_dict["message"]["text"])
-				
-				if chat["error_code"] != 400:
-					self.addChat(update_dict["message"]["text"])
-
-					# Success message
-					sendMessage(self.chat_id, "Чат добавлено.\nДобавленные чаты можно посмотреть с помощью команды \"/view_chats\"")
-				
-				# Error message
-				else: sendMessage(self.chat_id, "Чат не найден")
-
-			# Error message
-			else: sendMessage(self.chat_id, "Неверный формат")
-		
-		# Upload message
-		elif command == "upload_message":
-
-			# Upload message
-			if "text" in update_dict["message"]:
-				self.addMessage(update_dict["message"]["text"])
-
-				# Success message
-				sendMessage(self.chat_id, "Сообщение добавлено.\nДобавленные сообщения можно посмотреть с помощью команды \"/view_messages\"")
-
-			# Error message
-			else: sendMessage(self.chat_id, "Неверный формат")
-
-		# Upload photos
-		elif command == "upload_photos":
-			
-			# Upload photo
-			if "photo" in update_dict["message"]:
-
-				text = "Изображение добавлено"
-				
-				# Upload many photos
-				if "media_group_id" in update_dict["message"]:
-					
-					# Selecting the desired group
-					photos = [x for x in [y for y in response if "media_group_id" in y["message"]] if x["message"]["media_group_id"] == update_dict["message"]["media_group_id"]]
-					self.addPhoto(photos)
-					
-					text = "Изображения добавлены"
-
-				# Upload single photo
-				else: self.addPhoto(update_dict["message"]["photo"][0]["file_id"])
-
-				# Success message
-				sendMessage(self.chat_id, f"{text}.\nДобавленные изображения можно посмотреть с помощью команды \"/view_photos\"")
-
-			# Error message
-			else: sendMessage(self.chat_id, "Неверный формат")
+		self.cmd.processingDistribution(command, response)
 
 	# Data update
 	def update(self):
@@ -128,7 +73,7 @@ class App:
 
 		# Command initialization
 		if text in commands:
-			self.commandInit(commands[text])
+			self.cmd.commandDistribution(commands[text])
 
 	# Add command
 	def addCommand(self, chat_id, command):
@@ -148,99 +93,18 @@ class App:
 
 		return result
 
-	# Command initialization
-	def commandInit(self, command):
-		print(command)
-
-		# /start
-		# Start
-		if command == "start":
-			sendMessage(self.chat_id, "Добро пожаловать. Выберите интересующее вас действие, введя в поле ввода \"/\"")
-
-		# /upload_chat
-		# Upload chat
-		elif command == "upload_chat":
-			self.addCommand(self.chat_id, command)
-			sendMessage(self.chat_id, "Введите название чата в формате @name или id (бот должен находится на должности администратора в этом чате)")
-		
-		# /upload_message
-		# Upload message
-		elif command == "upload_message":
-			self.addCommand(self.chat_id, command)
-			sendMessage(self.chat_id, "Введите текст сообщения")
-
-		# /upload_photos
-		# Upload photos
-		elif command == "upload_photos":
-			self.addCommand(self.chat_id, command)
-			sendMessage(self.chat_id, "Вставьте изображение (не более 10 за раз для корректного добавления)")
-
-		# /view_chats
-		# View chats
-		elif command == "view_chats":
-			if not self.outChats(self.getChats()):
-				sendMessage(self.chat_id, "Чаты отсутствуют")
-
-		# /view_messages
-		# View message
-		elif command == "view_messages":
-			if not self.outMessages(self.getMessages()):
-				sendMessage(self.chat_id, "Сообщения отсутствуют")
-
-		# /view_photos
-		# View photos
-		elif command == "view_photos":
-			if not self.outPhotos(self.getPhotos(), self.chat_id):
-				sendMessage(self.chat_id, "Изображения отсутствуют")
-
-		# /clear_chats
-		# Clear chats
-		elif command == "clear_chats":
-			self.clearChats()
-			sendMessage(self.chat_id, "Список чатов очищен")
-
-		# /clear_messages
-		# Clear messages
-		elif command == "clear_messages":
-			self.clearMessages()
-			sendMessage(self.chat_id, "Список сообщений очищен")
-
-		# /clear_photos
-		# Clear photos
-		elif command == "clear_photos":
-			self.clearPhotos()
-			sendMessage(self.chat_id, "Список изображений очищен")
-
-	# Get chats
-	def getChats(self):
-		result = self.storage.getList(self.chat_id, "chats")
+	# Get list
+	def getList(self, key):
+		result = self.storage.getList(self.chat_id, key)
 		return result
 
-	# Get messages
-	def getMessages(self):
-		result = self.storage.getList(self.chat_id, "messages")
-		return result
-
-	# Get photos
-	def getPhotos(self):
-		result = self.storage.getList(self.chat_id, "photos")
-		return result
-
-	# Clear chats
-	def clearChats(self):
-		self.storage.clearList(self.chat_id, "chats")
-
-	# Clear messages
-	def clearMessages(self):
-		self.storage.clearList(self.chat_id, "messages")
-
-	# Clear photos
-	def clearPhotos(self):
-		self.storage.clearList(self.chat_id, "photos")
+	# Clear list
+	def clearList(self, key):
+		self.storage.clearList(self.chat_id, key)
 
 	# Add chat
-	def addChat(self, chat):
-		self.storage.addChat(self.chat_id, chat)
+	def addChat(self, result):
+		self.storage.addChat(self.chat_id, result)
 
 	# Add message
 	def addMessage(self, text):
@@ -257,29 +121,19 @@ class App:
 
 		self.storage.addPhoto(self.chat_id, photos)
 
-	# Out chats
-	def outChats(self, array):
-		if not len(array): return False
-
-		count = 0
-		for chat in array:
-			sendMessage(self.chat_id, f"{count}. {chat['chat_id']}")
-			count += 1
-
-		sendMessage(self.chat_id, f"Всего чатов: {count}")
-
-		return True
-
 	# Out messages
 	def outMessages(self, array):
 		if not len(array): return False
+		select = "message" if "text" in array[0] else "chat"
 
-		count = 0
+		count = 1
 		for message in array:
-			sendMessage(self.chat_id, f"{count}. {message['text']}")
+			text = f"{count}) {message['text']}" if select == "message" else f"{count}) {message['title']} ({message['id']})"
+			sendMessage(self.chat_id, text)
 			count += 1
 
-		sendMessage(self.chat_id, f"Всего сообщений: {count}")
+		text = "Всего сообщений" if select == "message" else "Всего чатов"
+		sendMessage(self.chat_id, f"{text}: {count - 1}")
 
 		return True
 

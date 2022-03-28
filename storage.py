@@ -52,9 +52,9 @@ class Storage:
 		self.updateStorage(chat_id, storage)
 
 	# Add chat
-	def addChat(self, chat_id, chat):
+	def addChat(self, chat_id, result):
 		storage = self.getStorage(chat_id)
-		storage["chats"].append({"chat_id": chat})
+		storage["chats"].append(result)
 		self.updateStorage(chat_id, storage)
 
 	# Add message
