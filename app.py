@@ -99,8 +99,8 @@ class App:
 		return result
 
 	# Clear list
-	def clearList(self, key):
-		self.storage.clearList(self.chat_id, key)
+	def clearList(self, key, n=0):
+		self.storage.clearList(self.chat_id, key, n)
 
 	# Add chat
 	def addChat(self, result):
@@ -138,7 +138,7 @@ class App:
 		return True
 
 	# Out photos
-	def outPhotos(self, array, chat_id):
+	def outPhotos(self, chat_id, array):
 		if not len(array): return False
 
 		count = 0
@@ -148,5 +148,28 @@ class App:
 
 		if chat_id == self.chat_id:
 			sendMessage(chat_id, f"Всего изображений: {count}")
+
+		return True
+
+	# Post messages
+	def postMessages(self, chats, array):
+		if not len(chats) or not len(array): return False
+		
+		for chat in chats:
+			for message in array:
+				sendMessage(chat["id"], message["text"])
+
+		self.clearList("messages")
+
+		return True
+
+	# Post photos
+	def postPhotos(self, chats, array):
+		if not len(chats) or not len(array): return False
+
+		for chat in chats:
+			self.outPhotos(chat["id"], array)
+
+		self.clearList("photos", 20)
 
 		return True

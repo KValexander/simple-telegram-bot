@@ -20,4 +20,10 @@ commands = {
 	"/upload_photos": "upload_photos",
 	"/view_photos": "view_photos",
 	"/clear_photos": "clear_photos",
+	# Post
+	"/post_messages": "post_messages",
+	"/post_photos": "post_photos",
+	"/post_time_message": "post_time_message",
+	"/post_time_photos": "post_time_photos",
+	"/post_stop": "post_stop"
 }

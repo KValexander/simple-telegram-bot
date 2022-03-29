@@ -128,7 +128,7 @@ class Commands:
 	# /view_photos
 	# Command View photos
 	def command_view_photos(self):
-		if not self.app.outPhotos(self.app.getList("photos"), self.app.chat_id):
+		if not self.app.outPhotos(self.app.chat_id, self.app.getList("photos")):
 			sendMessage(self.app.chat_id, "Изображения отсутствуют")
 
 	# /clear_chats
@@ -148,3 +148,17 @@ class Commands:
 	def command_clear_photos(self):
 		self.app.clearList("photos")
 		sendMessage(self.app.chat_id, "Список изображений очищен")
+
+	# /post_messages
+	# Command Post messages
+	def command_post_messages(self):
+		if self.app.postMessages(self.app.getList("chats"), self.app.getList("messages")):
+			sendMessage(self.app.chat_id, "Сообщения опубликованы")
+		else: sendMessage(self.app.chat_id, "Сообщения отсутствуют")
+
+	# /post_photos
+	# Command Post photos
+	def command_post_photos(self):
+		if self.app.postPhotos(self.app.getList("chats"), self.app.getList("photos")):
+			sendMessage(self.app.chat_id, "Изображения опубликованы")
+		else: sendMessage(self.app.chat_id, "Изображения отсутствуют")
