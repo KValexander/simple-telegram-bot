@@ -1,4 +1,5 @@
 # Libraries
+import time
 import json
 import threading
 
@@ -18,6 +19,7 @@ class App:
 		self.update_limit = 30
 
 		self.commands = []
+		self.timers = []
 
 		self.storage = Storage()
 		self.cmd = Commands(self)
@@ -63,7 +65,7 @@ class App:
 		if not len(command): return
 
 		# Processing distribution
-		command = self.deleteCommand(self.chat_id)["command"]
+		command = self.deleteCommand()["command"]
 		self.cmd.processingDistribution(command, response)
 
 	# Data update
@@ -76,18 +78,18 @@ class App:
 			self.cmd.commandDistribution(commands[text])
 
 	# Add command
-	def addCommand(self, chat_id, command):
+	def addCommand(self, command):
 		self.commands.append({
-			"chat_id": chat_id,
+			"chat_id": self.chat_id,
 			"command": command,
 		})
 
 	# Delete command
-	def deleteCommand(self, chat_id):
+	def deleteCommand(self):
 		result = []
 
 		for index, command in enumerate(self.commands):
-			if command["chat_id"] == chat_id:
+			if command["chat_id"] == self.chat_id:
 				result = self.commands.pop(index)
 				break
 
@@ -143,7 +145,7 @@ class App:
 
 		count = 0
 		for photos in array:
-			sendMediaGroup(chat_id, json.dumps(photos))
+			sendMediaGroup(chat_id, json.dumps(photos.copy()))
 			count += len(photos)
 
 		if chat_id == self.chat_id:
@@ -164,12 +166,84 @@ class App:
 		return True
 
 	# Post photos
-	def postPhotos(self, chats, array):
+	def postPhotos(self, chats, array, n=20):
 		if not len(chats) or not len(array): return False
 
 		for chat in chats:
 			self.outPhotos(chat["id"], array)
 
-		self.clearList("photos", 20)
+		self.clearList("photos", n)
 
 		return True
+
+	# Add timer
+	def addTimer(self, timer):
+		self.timers.append({
+			"chat_id": self.chat_id,
+			"timer": timer
+		})
+
+	# Get timer
+	def getTimer(self):
+		for timer in self.timers:
+			if timer["chat_id"] == self.chat_id:
+				return timer
+
+	# Delete timer
+	def deleteTimer(self):
+		for index, timer in enumerate(self.timers):
+			if timer["chat_id"] == self.chat_id:
+				del self.timers[index]
+				return
+
+	# Start timer message
+	def startTimerMessage(self, chats, time=3):
+		timer = threading.Timer(time, self.postTimeMessage, (chats, time,))
+		self.addTimer(timer)
+		timer.start()
+
+	# Start timer photo
+	def startTimerPhoto(self, chats, time=3):
+		timer = threading.Timer(time, self.postTimePhoto, (chats, time,))
+		self.addTimer(timer)
+		timer.start()
+
+	# Post time message
+	def postTimeMessage(self, chats, time=3):
+		message = self.storage.popList(self.chat_id, "messages")
+
+		if not message:
+			self.deleteTimer()
+			sendMessage(self.chat_id, "Сообщения опубликованы")
+			return
+		
+		for chat in chats:
+			sendMessage(chat["id"], message["text"])
+
+		timer = self.getTimer()
+		timer["timer"] = threading.Timer(time, self.postTimeMessage, (chats, time,))
+		timer["timer"].start()
+
+	# Post time photo
+	def postTimePhoto(self, chats, time=3):
+		photo = self.storage.popList(self.chat_id, "photos")
+
+		if not photo:
+			self.deleteTimer()
+			sendMessage(self.chat_id, "Изображения опубликованы")
+			return
+
+		for chat in chats:
+			sendPhoto(chat["id"], photo["media"])
+
+		timer = self.getTimer()
+		timer["timer"] = threading.Timer(time, self.postTimePhoto, (chats, time,))
+		timer["timer"].start()
+
+	# Stop timer
+	def stopTimer(self):
+		timer = self.getTimer()
+		timer["timer"].cancel()
+
+		self.deleteTimer()
+

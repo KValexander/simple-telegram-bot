@@ -54,7 +54,6 @@ class Commands:
 		# Error message
 		else: sendMessage(self.app.chat_id, "Неверный формат")
 
-
 	# Processing Upload photos
 	def processing_upload_photos(self, response):
 		update_dict = response[-1]
@@ -83,10 +82,39 @@ class Commands:
 		# Error message
 		else: sendMessage(self.app.chat_id, "Неверный формат")
 
+	# Processing Post time message
+	def processing_post_time_message(self, response):
+		update_dict = response[-1]
+		self.prc_start_timers(update_dict, "message")
+
+	# Processing Post time photo
+	def processing_post_time_photo(self, response):
+		update_dict = response[-1]
+		self.prc_start_timers(update_dict, "photo")
+
+	# Processing start timers
+	def prc_start_timers(self, update_dict, entity):
+		if "text" in update_dict["message"]:
+			time = update_dict["message"]["text"]
+			
+			if time.isdigit():
+				time = int(time)
+				
+				sendMessage(self.app.chat_id, f"Время публикаций через секунд: {time}")
+
+				if entity == "photo":
+					self.app.startTimerPhoto(self.app.getList("chats"), time)
+				else:
+					self.app.startTimerMessage(self.app.getList("chats"), time)
+			
+			else: sendMessage(self.app.chat_id, "Неверный формат")
+		else: sendMessage(self.app.chat_id, "Неверный формат")
+
+
 	# Command distribution
 	# ==================================================
 	def commandDistribution(self, command):
-		print(command)
+		print(self.app.chat_id, command)
 		function = self.functions["command"][command]
 		eval(f"self.{function}()")
 
@@ -98,19 +126,19 @@ class Commands:
 	# /upload_chat
 	# Command Upload chat
 	def command_upload_chat(self):
-		self.app.addCommand(self.app.chat_id, "upload_chat")
+		self.app.addCommand("upload_chat")
 		sendMessage(self.app.chat_id, "Введите название чата в формате @name или id (бот должен находится на должности администратора в этом чате)")
 
 	# /upload_message
 	# Command Upload message
 	def command_upload_message(self):
-		self.app.addCommand(self.app.chat_id, "upload_message")
+		self.app.addCommand("upload_message")
 		sendMessage(self.app.chat_id, "Введите текст сообщения")
 
 	# /upload_photos
 	# Command Upload photos
 	def command_upload_photos(self):
-		self.app.addCommand(self.app.chat_id, "upload_photos")
+		self.app.addCommand("upload_photos")
 		sendMessage(self.app.chat_id, "Вставьте изображение (не более 10 за раз для корректного добавления)")
 
 	# /view_chats
@@ -162,3 +190,21 @@ class Commands:
 		if self.app.postPhotos(self.app.getList("chats"), self.app.getList("photos")):
 			sendMessage(self.app.chat_id, "Изображения опубликованы")
 		else: sendMessage(self.app.chat_id, "Изображения отсутствуют")
+
+	# /post_time_message
+	# Command Post time message
+	def command_post_time_message(self):
+		self.app.addCommand("post_time_message")
+		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа)")
+
+	# /post_time_photo
+	# Command Post time photo
+	def command_post_time_photo(self):
+		self.app.addCommand("post_time_photo")
+		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа)")
+
+	# /post_stop
+	# Command Post stop
+	def command_post_stop(self):
+		self.app.stopTimer()
+		sendMessage(self.app.chat_id, "Публикация остановлена")

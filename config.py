@@ -24,6 +24,6 @@ commands = {
 	"/post_messages": "post_messages",
 	"/post_photos": "post_photos",
 	"/post_time_message": "post_time_message",
-	"/post_time_photos": "post_time_photos",
+	"/post_time_photo": "post_time_photo",
 	"/post_stop": "post_stop"
 }

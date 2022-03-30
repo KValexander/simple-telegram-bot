@@ -45,13 +45,23 @@ class Storage:
 		storage = self.getStorage(chat_id)
 		return storage[key]
 
+	# Pop list
+	def popList(self, chat_id, key):
+		storage = self.getStorage(chat_id)
+		if not len(storage[key]): return False
+		result = storage[key][0].pop(0) if key == "photos" else storage[key].pop(0)
+		if key == "photos":
+			if not len(storage[key][0]): storage["photos"].pop(0)
+		self.updateStorage(chat_id, storage)
+		return result
+
 	# Clear list
 	def clearList(self, chat_id, key, n=0):
 		storage = self.getStorage(chat_id)
 		count = len(storage[key]) if key != "photos" else self.countPhotos(storage[key])
 		if not n or n >= count: storage[key].clear()
 		else:
-			if key == "photos": storage[key] = self.delPhotos(storage[key], count)
+			if key == "photos": storage[key] = self.delPhotos(storage[key], n)
 			else: del storage[key][:n]
 		self.updateStorage(chat_id, storage)
 
@@ -63,9 +73,8 @@ class Storage:
 		return count
 
 	# Delete photos
-	def delPhotos(self, array, count):
-		# Why doesn't it work correctly?
-		for i in range(count):
+	def delPhotos(self, array, n):
+		for i in range(n):
 			del array[0][0]
 			if not len(array[0]):
 				del array[0]

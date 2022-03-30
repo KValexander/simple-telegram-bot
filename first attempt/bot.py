@@ -102,7 +102,6 @@ def commandProcessing(update_obj, response):
                 api["timer"].start()
             else: sendMessage(api["chat_id"], "Неверный формат")
 
-
 # Add photo
 def addPhoto(file_id):
     index = len(api["photos"]) - 1
