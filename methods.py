@@ -12,6 +12,7 @@ tg_commands = {
 	"sendMediaGroup": "/sendMediaGroup?",
 	"getFile": "/getFile?",
 	"getChat": "/getChat?",
+	"getChatMember": "/getChatMember?",
 }
 
 # Get updates
@@ -48,4 +49,10 @@ def getFile(file_id):
 def getChat(chat):
 	message = f"chat_id={chat}"
 	get = api["url"] + tg_commands["getChat"] + message
+	return requests.get(get).json()
+
+# Get chat member
+def getChatMember(chat_id, user_id):
+	message = f"chat_id={chat_id}&user_id={user_id}"
+	get = api["url"] + tg_commands["getChatMember"] + message
 	return requests.get(get).json()

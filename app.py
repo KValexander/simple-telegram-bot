@@ -15,6 +15,7 @@ class App:
 	# Constructor
 	def __init__(self):
 		self.chat_id = 0
+		self.user_id = 0
 		self.update_id = 0
 		self.update_limit = 30
 
@@ -41,6 +42,7 @@ class App:
 		# Get update object
 		update_dict = response[-1]
 		self.chat_id = update_dict["message"]["chat"]["id"]
+		self.user_id = update_dict["message"]["from"]["id"]
 
 		# Check update_id
 		if self.update_id == 0:
@@ -87,13 +89,32 @@ class App:
 	# Delete command
 	def deleteCommand(self):
 		result = []
-
 		for index, command in enumerate(self.commands):
 			if command["chat_id"] == self.chat_id:
 				result = self.commands.pop(index)
 				break
-
 		return result
+
+	# Add timer
+	def addTimer(self, timer):
+		self.timers.append({
+			"chat_id": self.chat_id,
+			"timer": timer
+		})
+
+	# Get timer
+	def getTimer(self):
+		for timer in self.timers:
+			if timer["chat_id"] == self.chat_id:
+				return timer
+		return False
+
+	# Delete timer
+	def deleteTimer(self):
+		for index, timer in enumerate(self.timers):
+			if timer["chat_id"] == self.chat_id:
+				del self.timers[index]
+				return
 
 	# Get list
 	def getList(self, key):
@@ -153,9 +174,21 @@ class App:
 
 		return True
 
+	# Check admin
+	def checkAdmin(self, chats):
+		access = ["administrator", "creator"]
+		for chat in chats:
+			response = getChatMember(chat["id"], self.user_id)
+			if "error_code" not in response:
+				if response["result"]["status"] not in access:
+					sendMessage("Вы не являетесь администратором чата: " + chat["title"])
+					return False
+		return True
+
 	# Post messages
 	def postMessages(self, chats, array):
 		if not len(chats) or not len(array): return False
+		if not self.checkAdmin(chats): return False
 		
 		for chat in chats:
 			for message in array:
@@ -168,6 +201,7 @@ class App:
 	# Post photos
 	def postPhotos(self, chats, array, n=20):
 		if not len(chats) or not len(array): return False
+		if not self.checkAdmin(chats): return False
 
 		for chat in chats:
 			self.outPhotos(chat["id"], array)
@@ -176,34 +210,16 @@ class App:
 
 		return True
 
-	# Add timer
-	def addTimer(self, timer):
-		self.timers.append({
-			"chat_id": self.chat_id,
-			"timer": timer
-		})
-
-	# Get timer
-	def getTimer(self):
-		for timer in self.timers:
-			if timer["chat_id"] == self.chat_id:
-				return timer
-
-	# Delete timer
-	def deleteTimer(self):
-		for index, timer in enumerate(self.timers):
-			if timer["chat_id"] == self.chat_id:
-				del self.timers[index]
-				return
-
 	# Start timer message
 	def startTimerMessage(self, chats, time=3):
+		if not self.checkAdmin(chats): return False
 		timer = threading.Timer(time, self.postTimeMessage, (chats, time,))
 		self.addTimer(timer)
 		timer.start()
 
 	# Start timer photo
 	def startTimerPhoto(self, chats, time=3):
+		if not self.checkAdmin(chats): return False
 		timer = threading.Timer(time, self.postTimePhoto, (chats, time,))
 		self.addTimer(timer)
 		timer.start()
@@ -221,6 +237,7 @@ class App:
 			sendMessage(chat["id"], message["text"])
 
 		timer = self.getTimer()
+		if not timer: return
 		timer["timer"] = threading.Timer(time, self.postTimeMessage, (chats, time,))
 		timer["timer"].start()
 
@@ -237,12 +254,16 @@ class App:
 			sendPhoto(chat["id"], photo["media"])
 
 		timer = self.getTimer()
+		if not timer: return
 		timer["timer"] = threading.Timer(time, self.postTimePhoto, (chats, time,))
 		timer["timer"].start()
 
 	# Stop timer
 	def stopTimer(self):
 		timer = self.getTimer()
+		
+		if not timer: return
+
 		timer["timer"].cancel()
 
 		self.deleteTimer()
