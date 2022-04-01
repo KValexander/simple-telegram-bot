@@ -110,7 +110,6 @@ class Commands:
 			else: sendMessage(self.app.chat_id, "Неверный формат")
 		else: sendMessage(self.app.chat_id, "Неверный формат")
 
-
 	# Command distribution
 	# ==================================================
 	def commandDistribution(self, command):
