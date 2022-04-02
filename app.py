@@ -181,14 +181,23 @@ class App:
 			response = getChatMember(chat["id"], self.user_id)
 			if "error_code" not in response:
 				if response["result"]["status"] not in access:
-					sendMessage("Вы не являетесь администратором чата: " + chat["title"])
+					sendMessage(self.chat_id, "Вы не являетесь администратором чата: " + chat["title"])
 					return False
+		return True
+
+	# Check chats
+	def checkChats(self, chats):
+		if not len(chats):
+			sendMessage(self.chat_id, "Чаты отсутствуют")
+			return False
 		return True
 
 	# Post messages
 	def postMessages(self, chats, array):
-		if not len(chats) or not len(array): return False
-		if not self.checkAdmin(chats): return False
+		if not self.checkAdmin(chats) or not self.checkChats(chats): return
+		if not len(array):
+			sendMessage(self.chat_id, "Сообщения отсутствуют")
+			return
 		
 		for chat in chats:
 			for message in array:
@@ -196,30 +205,34 @@ class App:
 
 		self.clearList("messages")
 
-		return True
+		sendMessage(self.chat_id, "Сообщения опубликованы")
+
 
 	# Post photos
 	def postPhotos(self, chats, array, n=20):
-		if not len(chats) or not len(array): return False
-		if not self.checkAdmin(chats): return False
+		if not self.checkAdmin(chats) or not self.checkChats(chats): return
+		if not len(array):
+			sendMessage(self.chat_id, "Изображения отсутствуют")
+			return
 
 		for chat in chats:
 			self.outPhotos(chat["id"], array)
 
 		self.clearList("photos", n)
+		sendMessage(self.chat_id, "Изображения опубликованы")
 
 		return True
 
 	# Start timer message
 	def startTimerMessage(self, chats, time=3):
-		if not self.checkAdmin(chats): return False
+		if not self.checkAdmin(chats) or not self.checkChats(chats): return
 		timer = threading.Timer(time, self.postTimeMessage, (chats, time,))
 		self.addTimer(timer)
 		timer.start()
 
 	# Start timer photo
 	def startTimerPhoto(self, chats, time=3):
-		if not self.checkAdmin(chats): return False
+		if not self.checkAdmin(chats) or not self.checkChats(chats): return
 		timer = threading.Timer(time, self.postTimePhoto, (chats, time,))
 		self.addTimer(timer)
 		timer.start()

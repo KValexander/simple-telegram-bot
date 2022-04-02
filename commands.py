@@ -100,8 +100,12 @@ class Commands:
 			if time.isdigit():
 				time = int(time)
 				
-				sendMessage(self.app.chat_id, f"Время публикаций через секунд: {time}")
+				if time > 3600 or time < 1:
+					sendMessage(self.app.chat_id, "Только целые число от 1 до 3600")
+					return
 
+				sendMessage(self.app.chat_id, f"Время публикаций через секунд: {time}")
+				
 				if entity == "photo":
 					self.app.startTimerPhoto(self.app.getList("chats"), time)
 				else:
@@ -179,28 +183,24 @@ class Commands:
 	# /post_messages
 	# Command Post messages
 	def command_post_messages(self):
-		if self.app.postMessages(self.app.getList("chats"), self.app.getList("messages")):
-			sendMessage(self.app.chat_id, "Сообщения опубликованы")
-		else: sendMessage(self.app.chat_id, "Сообщения отсутствуют")
+		self.app.postMessages(self.app.getList("chats"), self.app.getList("messages"))
 
 	# /post_photos
 	# Command Post photos
 	def command_post_photos(self):
-		if self.app.postPhotos(self.app.getList("chats"), self.app.getList("photos")):
-			sendMessage(self.app.chat_id, "Изображения опубликованы")
-		else: sendMessage(self.app.chat_id, "Изображения отсутствуют")
+		self.app.postPhotos(self.app.getList("chats"), self.app.getList("photos"))
 
 	# /post_time_message
 	# Command Post time message
 	def command_post_time_message(self):
 		self.app.addCommand("post_time_message")
-		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа)")
+		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа от 1 до 3600)")
 
 	# /post_time_photo
 	# Command Post time photo
 	def command_post_time_photo(self):
 		self.app.addCommand("post_time_photo")
-		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа)")
+		sendMessage(self.app.chat_id, "Введите разницу времени публикации в секундах (только целые числа от 1 до 3600)")
 
 	# /post_stop
 	# Command Post stop
